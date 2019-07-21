@@ -7,6 +7,7 @@ This script can automatically install ecj, dx and termux-tools in termux to run 
 ## Install
 
 ```bash
+pkg i git ecj dx -y
 cd ~
 git clone https://github.com/HemanthJabalpuri/run_java
 cd run_java
@@ -14,7 +15,10 @@ sh install.sh
 ```
 
 ## Run java program
-`java <JavaFile>`  
+```
+javac <JavaFile>.java
+java <JavaFile>
+```  
 
 example:  
 ```bash
