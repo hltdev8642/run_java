@@ -4,6 +4,8 @@ javac=/data/data/com.termux/files/usr/bin/javac
 java=/data/data/com.termux/files/usr/bin/java
 
 cat > $javac <<-'EOF'
+	#!/system/bin/sh
+
 	if [ -z "$1" ] || ! [ -f "$1" ]; then
 	  echo "$1 File not Found" >&2
 	  exit
@@ -11,25 +13,34 @@ cat > $javac <<-'EOF'
 	  echo "ecj/dx not Found" >&2
 	  exit
 	fi
+
 	dir="$(dirname "$(realpath "$1")")"
 	name="$(basename "$1" .java)"
-	cd "$dir"
-	ecj "${name}.java" || {
+	tempdir="$dir/tmp$RANDOM"
+
+	ecj -sourcepath "$dir" "$dir/${name}.java" -d "$tempdir" || {
 	  echo "Unable to compile $1"; exit
 	}
-	dx --dex --output="${name}.dex" "${name}.class" || {
+
+	cd "$tempdir"
+	dx --dex --output="$dir/${name}.dex" * || {
 	  echo "Unable to dex classes"; exit
 	}
-	rm -f "${name}.class"
+
+	rm -rf "$tempdir"
 EOF
 
 cat > $java <<-'EOF'
+	#!/system/bin/sh
+
 	if [ -z "$1" ] || ! [ -f "${1}.dex" ]; then
 	  echo "$1 File not Found" >&2
 	  exit
 	fi
+
 	dir="$(dirname "$(realpath "${1}.dex")")"
 	name="$(basename "$1")"
+
 	dalvikvm -cp "${dir}/${name}.dex" "${name}" || {
 	  echo "Unable to run java package"; exit
 	}
