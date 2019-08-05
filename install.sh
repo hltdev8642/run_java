@@ -35,11 +35,14 @@ cat > $java <<-'EOF'
 	mkdir -p "$tempdir"
 	name="$(basename "$1")"
 
-	dx --dex --output="$tmpdir/${name}.dex" "${dir}/${name}.class" || {
+	olddir="$(pwd)"
+	cd "${dir}"
+	dx --dex --output="$tempdir/${name}.dex" "${name}.class" || {
 	  echo "Unable to dex classes"; exit
 	}
+	cd "${olddir}"
 
-	dalvikvm -cp "${tmpdir}/${name}.dex" "${name}" || {
+	dalvikvm -cp "${tempdir}/${name}.dex" "${name}" || {
 	  echo "Unable to run java package"; exit
 	}
 
