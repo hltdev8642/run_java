@@ -4,22 +4,28 @@ javac=/data/data/com.termux/files/usr/bin/javac
 java=/data/data/com.termux/files/usr/bin/java
 
 cat > $javac <<-'EOF'
-	#!/system/bin/sh
+#!/system/bin/sh
 
-	if [ -z "$1" ] || ! [ -f "$1" ]; then
-	  echo "$1 File not Found" >&2
-	  exit
-	elif [ -z "$(command -v ecj)" ] || [ -z "$(command -v dx)" ]; then
-	  echo "ecj/dx not Found" >&2
-	  exit
-	fi
+        if [ -z "$1" ] || ! [ -f "$1" ]; then
+          echo "$1 File not Found" >&2
+          exit
+        elif [ -z "$(command -v ecj)" ] || [ -z "$(command -v dx)" ]; then
+          echo "ecj/dx not Found" >&2
+          exit
+        fi
 
-	dir="$(dirname "$(realpath "$1")")"
-	name="$(basename "$1" .java)"
+  # iterates through (.java) file args
+  # works for both individial filenames and `*.java`
+  for i in ${@}; do
+    # echo $i
 
-	ecj -sourcepath "$dir" "$dir/${name}.java" -d "$dir" || {
-	  echo "Unable to compile $1"; exit
-	}
+        dir="$(dirname "$(realpath "$i")")"
+        name="$(basename "$i" .java)"
+        ecj -sourcepath "$dir" "$dir/${name}.java" -d "$dir" || {
+          echo "Unable to compile $i"; exit
+        }
+
+  done
 EOF
 
 cat > $java <<-'EOF'
